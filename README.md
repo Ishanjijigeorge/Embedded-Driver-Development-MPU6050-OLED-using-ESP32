@@ -3,6 +3,7 @@
 ## Overview
 
 This project was implemented as part of an embedded firmware / driver development task.  
+
 The objective was to interface an MPU6050 accelerometer and an SSD1306 OLED display using low-level I2C communication, without relying on high-level libraries.
 
 ---
