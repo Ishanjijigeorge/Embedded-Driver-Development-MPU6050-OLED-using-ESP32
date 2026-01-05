@@ -15,63 +15,69 @@ The objective was to interface an MPU6050 accelerometer and an SSD1306 OLED disp
 
 ---
 
-## What I Implemented
+## Firmware Implementation
 
-### MPU6050 (Sensor Side)
-- I2C communication at register level  
-- Woke the sensor from sleep using the power management register  
-- Read X, Y, Z accelerometer data using burst reads  
-- Verified sensor communication using the WHO_AM_I register  
-- Converted raw values into acceleration values (g)  
+### MPU6050 (Sensor Interface)
+
+- I2C communication implemented using Arduino `Wire` as the transport layer  
+- Sensor woken from sleep by writing to the power management register  
+- X, Y, Z accelerometer data read using burst register reads  
+- Sensor presence verified using the `WHO_AM_I` register  
+- Raw accelerometer values converted to physical units (g)
+
+> Note: The firmware logic is independent of the I2C abstraction layer and can be migrated to a register-level I2C driver if required.
 
 ---
 
-### OLED Display (Display Side)
-- No high-level OLED display libraries used  
-- Manual SSD1306 initialization sequence  
+### OLED Display (SSD1306)
+
+- No external OLED display libraries used  
+- SSD1306 initialized manually using datasheet-defined command sequences  
 - Direct control of page and column addressing  
-- Implemented screen clear and cursor positioning  
-- Sent pixel data directly to the display  
+- Implemented screen clearing and cursor positioning  
+- Pixel data written directly to the display over I2C
 
 ---
 
 ### Text Rendering
-- Implemented a custom 5×7 bitmap font  
-- Manually rendered characters and numbers  
-- Displayed real-time accelerometer values on the OLED  
+
+- Custom 5×7 bitmap font implemented  
+- Characters rendered manually without graphics libraries  
+- Real-time accelerometer values displayed on the OLED
 
 ---
 
-## Bonus Implementation
+## Additional Functionality
 
-- Calculated device tilt using accelerometer data  
-- Applied simple low-pass filtering to reduce noise  
-- Displayed tilt using a bubble-level style indicator  
-- Updated only required display sections to reduce flicker  
+- Device tilt calculated using accelerometer data  
+- Simple low-pass filtering applied to reduce noise  
+- Bubble-level style indicator implemented for tilt visualization  
+- Display update rate controlled using non-blocking timing (`millis()`)
 
 ---
 
 ## Firmware Flow
 
-1. Initialize I2C communication  
+1. Initialize I2C interface  
 2. Wake MPU6050 from sleep mode  
 3. Initialize SSD1306 OLED display  
-4. Read accelerometer data  
-5. Convert raw values to physical units  
-6. Calculate tilt angle  
-7. Display values on OLED  
+4. Validate sensor using `WHO_AM_I`  
+5. Read accelerometer data  
+6. Convert raw values to physical units  
+7. Calculate tilt angle  
+8. Update OLED display
 
 ---
 
 ## Notes
 
-- ESP32 was used as a professional microcontroller allowed by the task  
-- Focus was on low-level firmware and driver development  
-- UI complexity was intentionally kept minimal  
+- ESP32 was used as a production-capable microcontroller  
+- Dynamic memory usage was avoided in the main loop  
+- Blocking delays were avoided to keep the firmware scalable  
+- Focus was on correctness, clarity, and embedded-safe practices
 
 ---
 
 ## Summary
 
-This project demonstrates basic embedded firmware skills including register-level sensor interfacing, custom OLED driver development, and real-time data visualization without using high-level libraries.
-
+This project demonstrates embedded firmware fundamentals including sensor interfacing, custom OLED control, safe data formatting, and real-time visualization. The implementation prioritizes clarity and correctness and is structured to allow future migration to lower-level peripheral drivers if required.
