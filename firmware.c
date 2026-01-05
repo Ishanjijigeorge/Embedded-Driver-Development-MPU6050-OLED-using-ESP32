@@ -144,15 +144,28 @@ void oled_draw_bubble(int pos) {
 }
 
 float angle_filt = 0;
+unsigned long last_time = 0;
 
 void setup() {
   Wire.begin(21, 22);
   mpu_init();
   oled_init();
   oled_clear();
+
+  uint8_t id = mpu_whoami();
+  if (id != 0x68) {
+    oled_set_cursor(0, 0);
+    oled_print("MPU FAIL");
+    while (1);   // Stop execution
+  }
 }
 
+
 void loop() {
+
+  if (millis() - last_time < 40) return;
+  last_time = millis();
+
   int16_t ax, ay, az;
   read_mpu(ax, ay, az);
 
@@ -169,24 +182,27 @@ void loop() {
 
   int pos = map(angle, -45, 45, 0, 127);
 
+  char buf[10];
+
   oled_set_cursor(0, 0);
-  oled_print("X:"); oled_print(String(xg,2).c_str());
+  oled_print("X:");
+  dtostrf(xg, 4, 2, buf);
+  oled_print(buf);
 
   oled_set_cursor(2, 0);
-  oled_print("Y:"); oled_print(String(yg,2).c_str());
+  oled_print("Y:");
+  dtostrf(yg, 4, 2, buf);
+  oled_print(buf);
 
   oled_set_cursor(4, 0);
-  oled_print("Z:"); oled_print(String(zg,2).c_str());
+  oled_print("Z:");
+  dtostrf(zg, 4, 2, buf);
+  oled_print(buf);
 
   oled_set_cursor(6, 0);
-  oled_print("A:"); oled_print(String(angle,1).c_str());
+  oled_print("A:");
+  dtostrf(angle, 4, 1, buf);
+  oled_print(buf);
 
   oled_draw_bubble(pos);
-
-  delay(40);
 }
-
-
-
-
-
